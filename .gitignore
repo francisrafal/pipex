@@ -1,0 +1,6 @@
+*.swp
+pipex
+*.o
+obj/
+libft/libft.a
+.vscode
