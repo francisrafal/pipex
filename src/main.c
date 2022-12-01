@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:19 by frafal            #+#    #+#             */
-/*   Updated: 2022/11/30 17:47:41 by frafal           ###   ########.fr       */
+/*   Updated: 2022/12/01 14:03:11 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,41 +34,37 @@ void	parent_process(int pipefd[])
 	exit(EXIT_SUCCESS);
 }
 
+void	perror_exit(char *err)
+{
+	perror(err);
+	exit(EXIT_FAILURE);
+}
+
 int	main(int argc, char **argv)
 {
-	//int	fd;
-	pid_t	pid;
-	int	pipefd[2];
-	(void)argv;
+	t_data	data;
+	int		pipefd[2];
 
 	if (argc != 5)
 	{
 		ft_putstr_fd("usage: ./pipex <file1> \"cmd1\" \"cmd2\" <file2>\n", 2);
 		exit (EXIT_FAILURE);
 	}
+	data.file1 = open(argv[1], O_RDONLY);	
+	if (data.file1 == -1)
+		perror_exit("open file1");
+	data.file2 = open(argv[4], O_WRONLY | O_TRUNC | O_CREAT,
+		S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);	
+	if (data.file2 == -1)
+		perror_exit("open file2");
 	if (pipe(pipefd) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE);
-	}
-	if (pid == 0)
+		perror_exit("pipe");
+	data.pid1 = fork();
+	if (data.pid1 == -1)
+		perror_exit("fork");
+	if (data.pid1 == 0)
 		child_process(pipefd);
 	else
 		parent_process(pipefd);
-	/*
-	ft_printf("0: %d, 1: %d\n", pipefd[0], pipefd[1]);
-	fd = open(argv[1], O_RDONLY);
-	if (fd == -1)
-	{
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	*/
 	return (0);
 }

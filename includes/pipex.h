@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:42 by frafal            #+#    #+#             */
-/*   Updated: 2022/11/29 10:36:41 by frafal           ###   ########.fr       */
+/*   Updated: 2022/12/01 13:51:03 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,5 +22,13 @@
 # include <fcntl.h>
 # include <stdlib.h>
 # include "libft.h"
+
+typedef struct s_data
+{
+	int		file1;
+	int		file2;
+	pid_t	pid1;
+	pid_t	pid2;
+}	t_data;
 
 #endif
