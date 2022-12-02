@@ -6,33 +6,11 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:19 by frafal            #+#    #+#             */
-/*   Updated: 2022/12/01 14:03:11 by frafal           ###   ########.fr       */
+/*   Updated: 2022/12/02 16:45:46 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-void	child_process(int pipefd[])
-{
-	char	buf;
-
-	close(pipefd[1]);
-	ft_putstr_fd("I received this from my parent:\n", STDOUT_FILENO);
-	while (read(pipefd[0], &buf, 1) > 0)
-		ft_putchar_fd(buf, STDOUT_FILENO);
-	close(pipefd[0]);
-	exit(EXIT_SUCCESS);
-}
-
-void	parent_process(int pipefd[])
-{
-	close(pipefd[0]);
-	ft_putstr_fd("Let's write a secret\n", STDOUT_FILENO);
-	ft_putstr_fd("I am your father!\n", pipefd[1]);
-	close(pipefd[1]);
-	//wait(NULL);
-	exit(EXIT_SUCCESS);
-}
 
 void	perror_exit(char *err)
 {
@@ -40,10 +18,43 @@ void	perror_exit(char *err)
 	exit(EXIT_FAILURE);
 }
 
+void	child1_process(t_data data)
+{
+	dup2(data.pipefd[1], 1);
+	close(data.pipefd[0]);
+	dup2(data.file1, 0);
+	ft_putstr_fd("Hello1\n", STDOUT_FILENO);
+	close(data.pipefd[0]);
+	exit(EXIT_SUCCESS);
+}
+
+void	child2_process(t_data data)
+{
+	close(data.pipefd[1]);
+	ft_putstr_fd("Hello2\n", STDOUT_FILENO);
+	close(data.pipefd[0]);
+	exit(EXIT_SUCCESS);
+}
+
+void	parent_process(t_data data)
+{
+	data.pid2 = fork();
+	if (data.pid2 == -1)
+		perror_exit("fork");
+	if (data.pid2 == 0)
+		child2_process(data);
+	waitpid(data.pid1, &(data.wstatus), 0);	
+	waitpid(data.pid2, &(data.wstatus), 0);	
+
+	close(data.pipefd[0]);
+	ft_putstr_fd("Let's write a secret\n", STDOUT_FILENO);
+	close(data.pipefd[1]);
+	exit(EXIT_SUCCESS);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data	data;
-	int		pipefd[2];
 
 	if (argc != 5)
 	{
@@ -57,14 +68,14 @@ int	main(int argc, char **argv)
 		S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);	
 	if (data.file2 == -1)
 		perror_exit("open file2");
-	if (pipe(pipefd) == -1)
+	if (pipe(data.pipefd) == -1)
 		perror_exit("pipe");
 	data.pid1 = fork();
 	if (data.pid1 == -1)
 		perror_exit("fork");
 	if (data.pid1 == 0)
-		child_process(pipefd);
+		child1_process(data);
 	else
-		parent_process(pipefd);
+		parent_process(data);
 	return (0);
 }
