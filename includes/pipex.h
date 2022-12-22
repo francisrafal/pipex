@@ -31,6 +31,8 @@ typedef struct s_data
 	int		wstatus;
 	pid_t	pid1;
 	pid_t	pid2;
+	char	*cmd;
+	char	**cmd_args;
 }	t_data;
 
 #endif
