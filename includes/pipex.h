@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:42 by frafal            #+#    #+#             */
-/*   Updated: 2023/01/11 14:27:00 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/11 17:17:52 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ typedef struct s_data
 	pid_t	pid2;
 	char	*cmd;
 	char	**cmd_args;
+	char	**paths;
 }	t_data;
 
 #endif

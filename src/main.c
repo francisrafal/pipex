@@ -6,12 +6,37 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:19 by frafal            #+#    #+#             */
-/*   Updated: 2023/01/11 14:54:46 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/11 17:23:34 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 #include <stdio.h>
+
+void	free_str_arr(char **str_arr)
+{
+	int	i;
+
+	i = 0;
+	while (str_arr[i] != NULL)
+	{
+		free(str_arr[i]);
+		i++;
+	}
+	free(str_arr);
+}
+
+void	print_str_arr(char **str_arr)
+{
+	int	i;
+
+	i = 0;
+	while (str_arr[i] != NULL)
+	{
+		ft_printf("%s\n", str_arr[i]);
+		i++;
+	}
+}
 
 void	perror_exit(char *err)
 {
@@ -26,6 +51,7 @@ void	child1_process(t_data data, char **argv, char **envp)
 	dup2(data.pipefd[1], STDOUT_FILENO);
 	data.cmd_args = ft_split(argv[2], ' ');
 	execve("/usr/bin/ls", data.cmd_args, envp);
+	perror_exit("execve");
 }
 
 void	child2_process(t_data data, char **argv, char **envp)
@@ -35,6 +61,7 @@ void	child2_process(t_data data, char **argv, char **envp)
 	dup2(data.pipefd[0], STDIN_FILENO);
 	data.cmd_args = ft_split(argv[3], ' ');
 	execve("/usr/bin/wc", data.cmd_args, envp);
+	perror_exit("execve");
 }
 
 void	parent_process(t_data data)
@@ -43,13 +70,27 @@ void	parent_process(t_data data)
 	close(data.pipefd[0]);
 	waitpid(data.pid1, NULL, 0);
 	waitpid(data.pid2, NULL, 0);
+	free_str_arr(data.paths);
+	//free_str_arr(data.cmd_args);
 	exit(EXIT_SUCCESS);
 }
 
 int	main(int argc, char **argv, char **envp)
 {
 	t_data	data;
+	int		i;
 
+	i = 0;
+	while (envp[i] != NULL)
+	{
+		if (ft_strncmp(envp[i], "PATH=", 5)	== 0)
+		{
+			data.paths = ft_split(envp[i] + 5, ':');
+			break ;
+		}
+		i++;
+	}
+	print_str_arr(data.paths);
 	if (argc != 5)
 	{
 		ft_putstr_fd("usage: ./pipex <file1> \"cmd1\" \"cmd2\" <file2>\n", 2);
