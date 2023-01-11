@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:42 by frafal            #+#    #+#             */
-/*   Updated: 2022/12/01 14:10:48 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/11 14:27:00 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ typedef struct s_data
 	int		file1;
 	int		file2;
 	int		pipefd[2];
-	int		wstatus;
+	int		wstatus1;
+	int		wstatus2;
 	pid_t	pid1;
 	pid_t	pid2;
 	char	*cmd;

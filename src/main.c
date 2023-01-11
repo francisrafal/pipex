@@ -6,11 +6,12 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:19 by frafal            #+#    #+#             */
-/*   Updated: 2022/12/02 16:45:46 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/11 14:54:46 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include <stdio.h>
 
 void	perror_exit(char *err)
 {
@@ -24,32 +25,24 @@ void	child1_process(t_data data, char **argv, char **envp)
 	dup2(data.file1, STDIN_FILENO);
 	dup2(data.pipefd[1], STDOUT_FILENO);
 	data.cmd_args = ft_split(argv[2], ' ');
-	ft_printf((data.cmd_args)[0]);
 	execve("/usr/bin/ls", data.cmd_args, envp);
-	//ft_putstr_fd("Hello1\n", STDOUT_FILENO);
 }
 
 void	child2_process(t_data data, char **argv, char **envp)
 {
-	//char	buf[8];
-
 	close(data.pipefd[1]);
 	dup2(data.file2, STDOUT_FILENO);
 	dup2(data.pipefd[0], STDIN_FILENO);
 	data.cmd_args = ft_split(argv[3], ' ');
-	ft_printf((data.cmd_args)[0]);
 	execve("/usr/bin/wc", data.cmd_args, envp);
-	//read(STDIN_FILENO, buf, 8);
-	//ft_putstr_fd(buf, STDOUT_FILENO);
 }
 
 void	parent_process(t_data data)
 {
-	waitpid(data.pid1, &(data.wstatus), 0);
-	waitpid(data.pid2, &(data.wstatus), 0);
-
-	close(data.pipefd[0]);
 	close(data.pipefd[1]);
+	close(data.pipefd[0]);
+	waitpid(data.pid1, NULL, 0);
+	waitpid(data.pid2, NULL, 0);
 	exit(EXIT_SUCCESS);
 }
 
@@ -83,7 +76,8 @@ int	main(int argc, char **argv, char **envp)
 			perror_exit("fork");
 		if (data.pid2 == 0)
 			child2_process(data, argv, envp);
-		parent_process(data);
+		else
+			parent_process(data);
 	}
 	return (0);
 }
