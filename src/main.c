@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:19 by frafal            #+#    #+#             */
-/*   Updated: 2023/01/11 17:23:34 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/12 16:23:07 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,55 @@ void	perror_exit(char *err)
 	exit(EXIT_FAILURE);
 }
 
+char	*get_cmd_path(t_data data)
+{
+	char	*cmd_path;
+	int		i;
+
+	if (ft_strncmp(data.cmd_args[0], "./", 2) == 0)
+		return (data.cmd_args[0]);
+	cmd_path = NULL;
+	i = 0;
+	while ((data.paths)[i] != NULL)
+	{
+		cmd_path = ft_strjoin(data.paths[i], data.cmd_args[0]);
+		if (access(cmd_path, F_OK | X_OK) == 0)
+			return (cmd_path);
+		free(cmd_path);
+		i++;
+	}
+	perror_exit("access");
+	return (NULL);
+}
+
+void	remove_quotes(t_data *data)
+{
+	int	i;
+
+	char	*tmp;
+	char	*trim;
+
+	tmp = NULL;
+	i = 0;
+	while (data->cmd_args[i] != NULL)
+	{
+		tmp = data->cmd_args[i];
+		trim = ft_strtrim(data->cmd_args[i], "\"'");
+		data->cmd_args[i] = trim;
+		free(tmp);
+		i++;
+	}
+}
+
 void	child1_process(t_data data, char **argv, char **envp)
 {
 	close(data.pipefd[0]);
 	dup2(data.file1, STDIN_FILENO);
 	dup2(data.pipefd[1], STDOUT_FILENO);
 	data.cmd_args = ft_split(argv[2], ' ');
-	execve("/usr/bin/ls", data.cmd_args, envp);
+	remove_quotes(&data);
+	data.cmd_path = get_cmd_path(data);	
+	execve(data.cmd_path, data.cmd_args, envp);
 	perror_exit("execve");
 }
 
@@ -60,7 +102,8 @@ void	child2_process(t_data data, char **argv, char **envp)
 	dup2(data.file2, STDOUT_FILENO);
 	dup2(data.pipefd[0], STDIN_FILENO);
 	data.cmd_args = ft_split(argv[3], ' ');
-	execve("/usr/bin/wc", data.cmd_args, envp);
+	data.cmd_path = get_cmd_path(data);	
+	execve(data.cmd_path, data.cmd_args, envp);
 	perror_exit("execve");
 }
 
@@ -75,27 +118,52 @@ void	parent_process(t_data data)
 	exit(EXIT_SUCCESS);
 }
 
-int	main(int argc, char **argv, char **envp)
+void	append_str(char ***paths, char *str)
 {
-	t_data	data;
 	int		i;
+	char	*tmp;
 
+	tmp = NULL;
+	i = 0;
+	while ((*paths)[i] != NULL)
+	{
+		tmp = (*paths)[i];
+		(*paths)[i] = ft_strjoin(tmp, str);
+		free(tmp);
+		i++;
+	}
+}
+
+char	**get_paths(char **envp)
+{
+	int		i;
+	char	**paths;
+
+	paths = NULL;
 	i = 0;
 	while (envp[i] != NULL)
 	{
 		if (ft_strncmp(envp[i], "PATH=", 5)	== 0)
 		{
-			data.paths = ft_split(envp[i] + 5, ':');
+			paths = ft_split(envp[i] + 5, ':');
 			break ;
 		}
 		i++;
 	}
-	print_str_arr(data.paths);
+	append_str(&paths, "/");
+	return (paths);
+}
+
+int	main(int argc, char **argv, char **envp)
+{
+	t_data	data;
+
 	if (argc != 5)
 	{
 		ft_putstr_fd("usage: ./pipex <file1> \"cmd1\" \"cmd2\" <file2>\n", 2);
 		exit (EXIT_FAILURE);
 	}
+	data.paths = get_paths(envp);
 	data.file1 = open(argv[1], O_RDONLY);
 	if (data.file1 == -1)
 		perror_exit("open file1");
