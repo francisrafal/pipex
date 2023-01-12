@@ -6,7 +6,7 @@
 /*   By: frafal <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:50:42 by frafal            #+#    #+#             */
-/*   Updated: 2023/01/12 14:36:22 by frafal           ###   ########.fr       */
+/*   Updated: 2023/01/12 17:37:36 by frafal           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,16 @@ typedef struct s_data
 	char	**cmd_args;
 	char	**paths;
 }	t_data;
+
+void	free_str_arr(char **str_arr);
+void	perror_exit(char *err);
+char	*get_cmd_path(t_data data);
+void	remove_quotes(t_data *data);
+void	child1_process(t_data data, char **argv, char **envp);
+void	child2_process(t_data data, char **argv, char **envp);
+void	parent_process(t_data data, char **argv, char **envp);
+void	append_str(char ***paths, char *str);
+char	**get_paths(char **envp);
+void	check_argc(int argc);
 
 #endif

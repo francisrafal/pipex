@@ -6,7 +6,7 @@
 #    By: frafal <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/07 10:02:44 by frafal            #+#    #+#              #
-#    Updated: 2022/11/28 16:51:47 by frafal           ###   ########.fr        #
+#    Updated: 2023/01/12 17:42:49 by frafal           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ HEADLIST		:= pipex.h
 HEADERS			:= $(addprefix ${HEADDIR}, ${HEADLIST})
 
 SRCSDIR			:= ./src/
-SRCSLIST		:= main.c
+SRCSLIST		:= main.c children.c helpers.c error.c parse_cmd.c
 SRCS			:= $(addprefix ${SRCSDIR}, ${SRCSLIST})
 
 OBJSDIR			:= ./obj/
@@ -78,5 +78,5 @@ fclean:			clean
 re:				fclean all
 
 test:			all
-				./${NAME} infile "ls -l" "wc-l" outfile 
-				./${NAME} infile "grep a1" "wc-w" outfile 
+				./${NAME} file1 "ls -l" "wc -l" test1.output
+				./${NAME} file1 "grep a1" "wc -w" test2.output
